@@ -1,0 +1,63 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "k-rsync.fullname" . }}
+  labels:
+{{ include "k-rsync.labels" . | indent 4 }}
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-delete-policy": before-hook-creation
+spec:
+  template:
+    metadata:
+      name:  {{ include "k-rsync.fullname" . }}
+    spec:
+      containers:
+      - name: rsync
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        command:
+          - rsync
+        args:
+          - "--archive"
+          - "--compress-level=9"
+          - "--stats"
+          - "--human-readable"
+          - "--progress"
+          - "/srcd/"
+          - "/dest/"
+        volumeMounts:
+        - name: source
+          mountPath: /srcd
+          readOnly: true
+        - name: destination
+          mountPath: /dest
+        resources:
+          {{- toYaml .Values.resources | nindent 12 }}
+      restartPolicy: OnFailure
+      volumes:
+        - name: source
+          persistentVolumeClaim:
+            claimName: "{{ .Values.pvc.source.claimName }}"
+        - name: destination
+          persistentVolumeClaim:
+            claimName: "{{ .Values.pvc.dest.claimName }}"
+    {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      serviceAccountName: {{ template "k-rsync.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
