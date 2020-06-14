@@ -1,0 +1,13 @@
+apiVersion: v1
+entries:
+  k-rsync:
+  - apiVersion: v1
+    appVersion: "1.0"
+    created: "2020-06-14T17:09:04.237783183+08:00"
+    description: A Helm chart for syncing PVC filesystem trees
+    digest: 1133733603e3b04046bab56deef57f74a9081eb9a2795b05b095db0304d6a920
+    name: k-rsync
+    urls:
+    - https://doughgle.github.io/k-rsync/k-rsync-0.1.0.tgz
+    version: 0.1.0
+generated: "2020-06-14T17:09:04.236683463+08:00"
