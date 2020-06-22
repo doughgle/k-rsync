@@ -13,7 +13,7 @@ rsync:
   parallelism: 1
 
 image:
-  repository: fpart-amqp-tools
+  repository: doughgle/fpart-amqp-tools
   tag: latest
   pullPolicy: IfNotPresent
 
