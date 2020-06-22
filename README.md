@@ -1,11 +1,26 @@
-# k-rsync - kube-native rsync 
+# k-rsync - kube-native parallel rsync 
 
-A Kubernetes rsync Job for syncing PVC filesystem trees, packaged as a Helm Chart 
-for templating and versioning.
+A Helm Chart for parallel r-syncing from a source PVC to destination PVC.
 
-# Process to copy contents from one PVC to another
+## Usage
 
-I created this to allow me to migrate from different storage backends for a given project. The process would be:
+In the `value.yaml` file, specify the `claimName` of the `source` and `dest` PVCs.
+
+```
+$ helm install my-release <repo>/k-rsync 
+```
+
+k-rsync partitions source file tree with [fpart](https://github.com/martymac/fpart) in live mode.
+Fpart's live mode requires specification of either:
+ - the number of files per partition, or
+ - the size (bytes) of a partition, or
+ - both
+
+For now, the implication is that the rsync job must be tuned for `completions` and `parallelism` based on initial 
+execution of fpart 
+(i.e. after initial installation, see logs from fpart job and update `completions` to equal the number of partitions).
+
+## Typical process to copy contents from one PVC to another
 
  * Create a new PVC using the preferred storage backend
  * Shutdown app (scale replicas to zero)
@@ -13,8 +28,3 @@ I created this to allow me to migrate from different storage backends for a give
  * Install/Upgrade the Helm Chart to run sync process job
  * Edit Pod specs to use new PVC
  * Scale app back up
-
-### Usage
-```
-$ helm install my-release <repo>/k-rsync 
-```
