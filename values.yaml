@@ -8,9 +8,13 @@ pvc:
   dest:
     claimName: dest-pvc
 
+rsync:
+  completions: 1
+  parallelism: 1
+
 image:
-  repository: doughgle/fpart
-  tag: v1.2.1
+  repository: fpart-amqp-tools
+  tag: latest
   pullPolicy: IfNotPresent
 
 imagePullSecrets: []
@@ -52,3 +56,14 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
+
+######### RabbitMQ #########
+rabbitmq:
+  service:
+    type: ClusterIP
+    port: 5672
+
+  image:
+    repository: rabbitmq
+    tag: latest
+    pullPolicy: IfNotPresent

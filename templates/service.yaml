@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "k-rsync.fullname" . }}-message-broker
+  labels:
+{{ include "k-rsync.labels" . | indent 4 }}
+spec:
+  type: {{ .Values.rabbitmq.service.type }}
+  ports:
+    - port: {{ .Values.rabbitmq.service.port }}
+      protocol: TCP
+      targetPort: amqp
+  selector:
+    app.kubernetes.io/name: {{ include "k-rsync.name" . }}-message-broker
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    component: rabbitmq
