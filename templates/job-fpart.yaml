@@ -1,61 +1,52 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: "{{ include "k-rsync.fullname" . }}-rsync"
+  name: "{{ include "k-rsync.fullname" . }}-fpart"
   labels:
 {{ include "k-rsync.labels" . | indent 4 }}
   annotations:
     "helm.sh/hook": post-install,post-upgrade
-    "helm.sh/hook-weight": "0"
+    "helm.sh/hook-weight": "-5"
     "helm.sh/hook-delete-policy": before-hook-creation
 spec:
-  completions: {{ .Values.rsync.completions }}
-  parallelism: {{ .Values.rsync.parallelism }}
   template:
     metadata:
-      name:  "{{ include "k-rsync.fullname" . }}-rsync"
+      name: "{{ include "k-rsync.fullname" . }}-fpart"
     spec:
       initContainers:
-        - name: amqp-consume
+        - name: amqp-declare-queue
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           command:
-            - "/bin/bash"
+            - /usr/bin/amqp-declare-queue
           args:
-            - "-c"
-            - "/usr/bin/amqp-consume --url=$(BROKER_URL) --queue=$(QUEUE) -c 1 cat > /parts/part.out"
+            - "--url=$(BROKER_URL)"
+            - "--queue=$(QUEUE)"
           env:
             - name: BROKER_URL
               value: 'amqp://guest:guest@{{ include "k-rsync.fullname" . }}-message-broker:{{ .Values.rabbitmq.service.port }}'
             - name: QUEUE
               value: file.list.part.queue
-          volumeMounts:
-            - name: parts
-              mountPath: /parts
       serviceAccountName: {{ template "k-rsync.serviceAccountName" . }}
       containers:
-      - name: rsync
+      - name: fpart-amqp-publish
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
+        workingDir: "/srcd"
         command:
-          - rsync
+          - "/bin/bash"
         args:
-          - "--files-from=/parts/part.out"
-          - "--archive"
-          - "--compress-level=9"
-          - "--stats"
-          - "--human-readable"
-          - "--progress"
-          - "/srcd/"
-          - "/dest/"
+          - "-c"
+          - "fpart -v -L -f 10000 -zz -o /tmp/part.out . -W 'cat ${FPART_PARTFILENAME} | /usr/bin/amqp-publish --url=$(BROKER_URL) --routing-key=$(QUEUE)'"
+        env:
+          - name: BROKER_URL
+            value: 'amqp://guest:guest@{{ include "k-rsync.fullname" . }}-message-broker:{{ .Values.rabbitmq.service.port }}'
+          - name: QUEUE
+            value: file.list.part.queue
         volumeMounts:
         - name: source
           mountPath: /srcd
           readOnly: true
-        - name: destination
-          mountPath: /dest
-        - name: parts
-          mountPath: /parts
         resources:
           {{- toYaml .Values.resources | nindent 12 }}
       restartPolicy: OnFailure
@@ -63,12 +54,6 @@ spec:
         - name: source
           persistentVolumeClaim:
             claimName: "{{ .Values.pvc.source.claimName }}"
-            readOnly: true
-        - name: destination
-          persistentVolumeClaim:
-            claimName: "{{ .Values.pvc.dest.claimName }}"
-        - name: parts
-          emptyDir: {}
     {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
