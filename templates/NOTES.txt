@@ -8,5 +8,4 @@
  █████ ░░████            █████   █████░░█████████     █████    █████  ░░█████ ░░█████████
 ░░░░░   ░░░░            ░░░░░   ░░░░░  ░░░░░░░░░     ░░░░░    ░░░░░    ░░░░░   ░░░░░░░░░
 
-A Kubernetes rsync Job for syncing PVC filesystem trees,
-packaged as a Helm Chart for templating and versioning.
+A Helm Chart for parallel r-syncing from a source PVC to destination PVC.

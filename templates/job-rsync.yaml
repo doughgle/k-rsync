@@ -9,13 +9,26 @@ metadata:
     "helm.sh/hook-weight": "0"
     "helm.sh/hook-delete-policy": before-hook-creation
 spec:
-  completions: {{ .Values.rsync.completions }}
-  parallelism: {{ .Values.rsync.parallelism }}
+  completions: {{ .Values.partitions }}
+  parallelism: {{ .Values.parallelism }}
   template:
     metadata:
       name:  "{{ include "k-rsync.fullname" . }}-rsync"
     spec:
       initContainers:
+        - name: amqp-declare-queue
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command:
+            - /usr/bin/amqp-declare-queue
+          args:
+            - "--url=$(BROKER_URL)"
+            - "--queue=$(QUEUE)"
+          env:
+            - name: BROKER_URL
+              value: 'amqp://guest:guest@{{ include "k-rsync.fullname" . }}-message-broker:{{ .Values.rabbitmq.service.port }}'
+            - name: QUEUE
+              value: "{{ .Values.queue }}"
         - name: amqp-consume
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
@@ -28,7 +41,7 @@ spec:
             - name: BROKER_URL
               value: 'amqp://guest:guest@{{ include "k-rsync.fullname" . }}-message-broker:{{ .Values.rabbitmq.service.port }}'
             - name: QUEUE
-              value: file.list.part.queue
+              value: "{{ .Values.queue }}"
           volumeMounts:
             - name: parts
               mountPath: /parts
