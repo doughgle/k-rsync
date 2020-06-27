@@ -8,9 +8,9 @@ pvc:
   dest:
     claimName: dest-pvc
 
-rsync:
-  completions: 1
-  parallelism: 1
+queue: file.list.part.queue
+partitions: 2
+parallelism: 2
 
 image:
   repository: doughgle/fpart-amqp-tools

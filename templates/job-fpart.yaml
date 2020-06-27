@@ -14,46 +14,56 @@ spec:
       name: "{{ include "k-rsync.fullname" . }}-fpart"
     spec:
       initContainers:
-        - name: amqp-declare-queue
+        - name: fpart
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          workingDir: "/srcd"
           command:
-            - /usr/bin/amqp-declare-queue
+            - "/bin/bash"
           args:
-            - "--url=$(BROKER_URL)"
-            - "--queue=$(QUEUE)"
+            - "-c"
+            - "fpart -v -n $(NUM_PARTITIONS) -zz -o /parts/fpart.out ."
+          env:
+            - name: NUM_PARTITIONS
+              value: "{{ .Values.partitions }}"
+          volumeMounts:
+            - name: source
+              mountPath: /srcd
+              readOnly: true
+            - name: parts
+              mountPath: /parts
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      serviceAccountName: {{ template "k-rsync.serviceAccountName" . }}
+      containers:
+        - name: amqp-publish
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          workingDir: "/srcd"
+          command:
+            - "/bin/bash"
+          args:
+            - "-c"
+            - 'find /parts/fpart.out.* -exec sh -c "cat {} | /usr/bin/amqp-publish --url=$(BROKER_URL) --routing-key=$(QUEUE)" \;'
           env:
             - name: BROKER_URL
               value: 'amqp://guest:guest@{{ include "k-rsync.fullname" . }}-message-broker:{{ .Values.rabbitmq.service.port }}'
             - name: QUEUE
-              value: file.list.part.queue
-      serviceAccountName: {{ template "k-rsync.serviceAccountName" . }}
-      containers:
-      - name: fpart-amqp-publish
-        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-        imagePullPolicy: {{ .Values.image.pullPolicy }}
-        workingDir: "/srcd"
-        command:
-          - "/bin/bash"
-        args:
-          - "-c"
-          - "fpart -v -L -f 10000 -zz -o /tmp/part.out . -W 'cat ${FPART_PARTFILENAME} | /usr/bin/amqp-publish --url=$(BROKER_URL) --routing-key=$(QUEUE)'"
-        env:
-          - name: BROKER_URL
-            value: 'amqp://guest:guest@{{ include "k-rsync.fullname" . }}-message-broker:{{ .Values.rabbitmq.service.port }}'
-          - name: QUEUE
-            value: file.list.part.queue
-        volumeMounts:
-        - name: source
-          mountPath: /srcd
-          readOnly: true
-        resources:
-          {{- toYaml .Values.resources | nindent 12 }}
+              value: "{{ .Values.queue }}"
+          volumeMounts:
+            - name: source
+              mountPath: /srcd
+              readOnly: true
+            - name: parts
+              mountPath: /parts
+              readOnly: true
       restartPolicy: OnFailure
       volumes:
         - name: source
           persistentVolumeClaim:
             claimName: "{{ .Values.pvc.source.claimName }}"
+        - name: parts
+          emptyDir: {}
     {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
