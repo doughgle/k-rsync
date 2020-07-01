@@ -22,10 +22,12 @@ spec:
             - "/bin/bash"
           args:
             - "-c"
-            - "fpart -vv -n $(NUM_PARTITIONS) -zz -o /parts/fpart.out . | tee /parts/fpart.log"
+            - "fpart -vv -n $(NUM_PARTITIONS) $(FPART_OPTS) -o /parts/fpart.out . | tee /parts/fpart.log"
           env:
             - name: NUM_PARTITIONS
-              value: "{{ .Values.partitions }}"
+              value: {{ .Values.partitions | quote }}
+            - name: FPART_OPTS
+              value: {{ .Values.fpartOpts | quote }}
           volumeMounts:
             - name: source
               mountPath: /srcd
