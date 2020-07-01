@@ -22,7 +22,7 @@ spec:
             - "/bin/bash"
           args:
             - "-c"
-            - "fpart -v -n $(NUM_PARTITIONS) -zz -o /parts/fpart.out ."
+            - "fpart -vv -n $(NUM_PARTITIONS) -zz -o /parts/fpart.out . | tee /parts/fpart.log"
           env:
             - name: NUM_PARTITIONS
               value: "{{ .Values.partitions }}"
