@@ -12,6 +12,37 @@ It's parallel by default!
 $ helm install my-release <repo>/k-rsync 
 ```
 
+## Chart Values
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| affinity | object | `{}` |  |
+| fpartOpts | string | `"-zz -x .zfs -x .snapshot* -x .ckpt"` | Override default fpart(1) options. |
+| fullnameOverride | string | `""` |  |
+| image.pullPolicy | string | `"IfNotPresent"` |  |
+| image.repository | string | `"doughgle/fpart-amqp-tools"` |  |
+| image.tag | string | `"latest"` |  |
+| imagePullSecrets | list | `[]` |  |
+| nameOverride | string | `""` |  |
+| nodeSelector | object | `{}` |  |
+| parallelism | int | `2` |  |
+| partitions | int | `2` |  |
+| podSecurityContext | object | `{}` |  |
+| pvc.dest.claimName | string | `"dest-pvc"` |  |
+| pvc.source.claimName | string | `"source-pvc"` |  |
+| queue | string | `"file.list.part.queue"` |  |
+| rabbitmq.image.pullPolicy | string | `"IfNotPresent"` |  |
+| rabbitmq.image.repository | string | `"rabbitmq"` |  |
+| rabbitmq.image.tag | string | `"latest"` |  |
+| rabbitmq.service.port | int | `5672` |  |
+| rabbitmq.service.type | string | `"ClusterIP"` |  |
+| resources | object | `{}` |  |
+| rsyncOpts | list | `["--archive","--compress-level=9","--numeric-ids"]` | Override default rsync(1) options. Use this option with care as             certain options are incompatible with a parallel usage (e.g.  --delete). |
+| securityContext | object | `{}` |  |
+| serviceAccount.create | bool | `true` |  |
+| serviceAccount.name | string | `nil` |  |
+| tolerations | list | `[]` |  |
+
 ## Description
 
 It's basically fpsync using the kubernetes Job scheduler.

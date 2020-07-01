@@ -12,8 +12,16 @@ queue: file.list.part.queue
 partitions: 2
 parallelism: 2
 
-# fpartOpts -- Override default fpart(1) options with fpartOpts.
+# fpartOpts -- Override default fpart(1) options.
 fpartOpts: "-zz -x .zfs -x .snapshot* -x .ckpt"
+
+# rsyncOpts -- Override default rsync(1) options. Use this option with care as
+#             certain options are incompatible with a parallel usage (e.g.  --delete).
+#
+rsyncOpts:
+  - "--archive"
+  - "--compress-level=9"
+  - "--numeric-ids"
 
 image:
   repository: doughgle/fpart-amqp-tools
