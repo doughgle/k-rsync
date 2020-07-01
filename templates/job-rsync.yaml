@@ -54,8 +54,9 @@ spec:
           - rsync
         args:
           - "--files-from=/parts/part.out"
-          - "--archive"
-          - "--compress-level=9"
+        {{  range .Values.rsyncOpts }}
+          - {{ . | quote }}
+        {{ end }}
           - "--stats"
           - "--human-readable"
           - "--progress"
