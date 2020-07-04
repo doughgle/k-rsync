@@ -1,0 +1,9 @@
+version: 2.1
+orbs:
+  helm: banzaicloud/helm@0.0.7
+
+workflows:
+  helm-lint:
+    jobs:
+      - helm/lint-chart:
+          charts-dir: .
