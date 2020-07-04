@@ -5,5 +5,5 @@ orbs:
 workflows:
   helm-lint:
     jobs:
-      - helm/lint-chart
+      - helm/lint-chart:
           charts-dir: .
