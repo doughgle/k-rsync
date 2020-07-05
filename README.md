@@ -9,7 +9,8 @@ By default, k-rsync partitions the source PVC into 2 sub-trees (`partitions: 2`)
 It's parallel by default!   
 
 ```
-$ helm install my-release <repo>/k-rsync 
+$ helm repo add doughgle https://doughgle.github.io/k-rsync
+$ helm install my-release doughgle/k-rsync 
 ```
 
 ## Chart Values
