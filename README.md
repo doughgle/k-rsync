@@ -1,10 +1,10 @@
 # k-rsync - kube-native parallel rsync 
 
-A Helm Chart for parallel r-syncing from a source PVC to destination PVC.
+A Helm Chart for parallel r-syncing from a source PVC (Persistent Volume Claim) to destination PVC.
 
 ## Usage
 
-In the `value.yaml` file, specify the `claimName` of the `source` and `dest` PVCs.
+In the [values.yaml](./values.yaml) file, specify the `claimName` of the `source` and `dest` PVCs.
 By default, k-rsync partitions the source PVC into 2 sub-trees (`partitions: 2`) and runs 2 rsync pods in parallel to completion (`parallelism: 2`).
 It's parallel by default!   
 
@@ -46,7 +46,7 @@ $ helm install my-release doughgle/k-rsync
 
 ## Description
 
-It's basically fpsync using the kubernetes Job scheduler.
+It's basically [fpsync](https://github.com/martymac/fpart/blob/master/tools/fpsync) using the kubernetes Job scheduler.
 
 1. k-rsync `partitions` the source PVC into sub-trees with [fpart](https://github.com/martymac/fpart).
 Each partition contains a list of files and directories.
