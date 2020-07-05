@@ -1,0 +1,23 @@
+apiVersion: v1
+entries:
+  k-rsync:
+  - apiVersion: v1
+    appVersion: "1.0"
+    created: "2020-07-05T03:49:20.501258532Z"
+    description: A Helm Chart for parallel r-syncing from a source PVC to destination
+      PVC.
+    digest: 35c4bbd507a0151f6ea894fe39a8a125eaa86b5275aee4aa59697ff97908da23
+    name: k-rsync
+    urls:
+    - https://github.com/doughgle/k-rsync/releases/download/k-rsync-0.2.0/k-rsync-0.2.0.tgz
+    version: 0.2.0
+  - apiVersion: v1
+    appVersion: "1.0"
+    created: "2020-06-14T17:09:04.237783183+08:00"
+    description: A Helm chart for syncing PVC filesystem trees
+    digest: 1133733603e3b04046bab56deef57f74a9081eb9a2795b05b095db0304d6a920
+    name: k-rsync
+    urls:
+    - https://doughgle.github.io/k-rsync/k-rsync-0.1.0.tgz
+    version: 0.1.0
+generated: "2020-06-14T17:09:04.236683463+08:00"
