@@ -7,3 +7,7 @@ workflows:
     jobs:
       - helm/lint-chart:
           charts-dir: .
+          filters:
+            branches:
+              ignore:
+                - gh-pages
